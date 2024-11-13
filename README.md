@@ -4,20 +4,23 @@ Para acessar a rota /protegido precisa ser efetuado o login na rota /login, assi
 
 ### Como Rodar:
 
+    yarn
     yarn dev
 
 ### Como buildar:
 
     yarn build
 
+# Criar .env com JWT_SECRET e PORT.
+
+    JWT_SECRET=qualquerchavesua
+    PORT=5173
 
 # DB CONTAINER
 
-### Construa a imagem do Docker usando o seguinte comando:
+### Entrar na pasta db_container e construa a imagem do Docker usando o seguinte comando:
 
-obs: entrar na pasta db_container e:
-
-   sudo docker compose up
+    sudo docker compose up
 
 ### Apagar todas as imagens
 
@@ -35,7 +38,6 @@ obs: entrar na pasta db_container e:
 
     sudo docker ps -a
 
-
 ### Verificar containers criados
 
     sudo docker images
@@ -44,15 +46,15 @@ obs: entrar na pasta db_container e:
 
 Algumas rota serão necessarias fornecer o token para executar alguma ação, passando no header da requisição:
 
-* x-access-token: valueToken
+- x-access-token: valueToken
 
 ---
 
 # Documentação da API
 
-***Todas as rotas documentadas:***
+**_Todas as rotas documentadas:_**
 
-###  Endpoint: /login
+### Endpoint: /login
 
 method: POST
 
@@ -61,6 +63,7 @@ Descrição: Tenta efetuar um login do usuário.
 Parâmetros de consulta: Nenhum.
 
 Enviar no corpo da requisição:
+
 ```
 {
 	"email": "teste@teste",
@@ -80,23 +83,24 @@ type: object
 }
 ```
 
-
 Email ou senha incorretas:
 
 Saida:
 
 type: string
+
 ```
 "Usuario e senha incorretos."
 ```
 
-###  Endpoint: /register
+### Endpoint: /register
 
 method: POST
 Descrição: Registra um usuário.
 Parâmetros de consulta: Nenhum.
 
 Enviar no corpo da requisição:
+
 ```
 {
 	"name": "ana",
@@ -116,15 +120,15 @@ type: object
 }
 ```
 
-
 Enviar campos a menos:
 Saida:
 type: string
+
 ```
 "Erro ao tentar cadastrar usuário."
 ```
 
-###  Endpoint: /user/:id
+### Endpoint: /user/:id
 
 method: GET
 Descrição: Pega informações de um usuário.
@@ -144,22 +148,23 @@ type: Objeto
 }
 ```
 
-
 Erro ao encontrar usuário:
 Saida:
 
 type: string
+
 ```
 'Erro ao tentar encontrar Usuário.'
 ```
 
-###  Endpoint: /update/user/:id
+### Endpoint: /update/user/:id
 
 method: PUT
 Descrição: Atualiza um usuário.
 Parâmetros de consulta: UUID, tipp string.
 
 Enviar no corpo da requisição:
+
 ```
 {
 	"name": "testeNovo",
@@ -175,18 +180,18 @@ type: string
 "Usuário atualizado com sucesso !!"
 ```
 
-
 Erro ao encontrar usuário:
 Saida:
 
 type: object
+
 ```
 {
 	"msgError": "Usuário não encontrado"
 }
 ```
 
-###  Endpoint: /delete/user/:id
+### Endpoint: /delete/user/:id
 
 method: DELETE
 Descrição: Deleta um usuário.
@@ -204,6 +209,7 @@ Erro ao encontrar usuário:
 Saida:
 
 type: string
+
 ```
 "Erro ao tentar deletar conta"
 ```
