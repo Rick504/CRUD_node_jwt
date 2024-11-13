@@ -38,6 +38,10 @@ Para acessar a rota /protegido precisa ser efetuado o login na rota /login, assi
 
     sudo docker ps -a
 
+### Reiniciar container
+
+    docker start <nome_ou_id_do_container>
+
 ### Verificar containers criados
 
     sudo docker images
