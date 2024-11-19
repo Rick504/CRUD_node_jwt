@@ -51,21 +51,6 @@ export function getUsers(): Promise<Object[]> {
     });
 }
 
-export async function readUser(id: string) {
-  const query = `
-    SELECT * FROM users WHERE id = $1;
-  `;
-  const values = [id];
-
-  return db
-    .query(query, values)
-    .then((res) => res.rows[0])
-    .catch((err) => {
-      console.error('Erro ao encontrar usuário:', err);
-      throw err;
-    });
-}
-
 export async function insertUser(user: IUser) {
   const id = uuidv4();
   const { name, email, password } = user;
