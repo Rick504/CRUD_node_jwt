@@ -132,11 +132,11 @@ type: string
 "Erro ao tentar cadastrar usuário."
 ```
 
-### Endpoint: /user/:id
+### Endpoint: /user
 
 method: GET
 Descrição: Pega informações de um usuário.
-Parâmetros de consulta: UUID, tipp string.
+UUID estao contidos no token e o backend pega do token.
 
 Saida:
 type: Objeto
@@ -161,11 +161,11 @@ type: string
 'Erro ao tentar encontrar Usuário.'
 ```
 
-### Endpoint: /update/user/:id
+### Endpoint: /update/user/
 
 method: PUT
 Descrição: Atualiza um usuário.
-Parâmetros de consulta: UUID, tipp string.
+UUID estao contidos no token e o backend pega do token.
 
 Enviar no corpo da requisição:
 
@@ -195,12 +195,12 @@ type: object
 }
 ```
 
-### Endpoint: /delete/user/:id
+### Endpoint: /delete/user/
 
 method: DELETE
 Descrição: Deleta um usuário.
-Parâmetros de consulta: UUID, tipp string.
-Enviar no corpo da requisição: Nada.
+Sem corpo da requisição.
+UUID estao contidos no token e o backend pega do token.
 
 Saida:
 type: string
