@@ -71,27 +71,49 @@ export async function insertUser(user: IUser) {
     });
 }
 
-export async function updateUser(user: IUser, id: string) {
+export async function updateUser(user: IUser, id: string): Promise<{ success: boolean; data?: IUser; message: string }> {
   const { name, email, password } = user;
+  try {
+    const userExistsQuery = `
+      SELECT id
+      FROM users
+      WHERE id = $1;
+    `;
+    const userExistsResult = await db.query(userExistsQuery, [id]);
 
-  const hashPassword = await bcrypt.hash(password, 10);
-  const query = `
-    UPDATE users
-    SET name = $1,
+    if (userExistsResult.rowCount === 0) {
+      return {
+        success: false,
+        message: 'Usuário não encontrado.',
+      };
+    }
+    const hashPassword = password ? await bcrypt.hash(password, 10) : undefined;
+
+    const updateQuery = `
+      UPDATE users
+      SET
+        name = $1,
         email = $2,
-        password = $3
-    WHERE id = $4;
-  `;
-  const values = [name, email, hashPassword, id];
+        password = COALESCE($3, password)
+      WHERE id = $4
+      RETURNING id, name, email;
+    `;
 
-  return db
-    .query(query, values)
-    .then((res) => res.rows[0])
-    .catch((err) => {
-      console.error('Erro ao atualizar usuário:', err);
-      throw err;
-    });
+    const values = [name, email, hashPassword, id];
+    const updateResult = await db.query(updateQuery, values);
+
+    return {
+      success: true,
+      data: updateResult.rows[0],
+      message: 'Usuário atualizado com sucesso.',
+    };
+
+  } catch (err) {
+    console.error('Erro ao atualizar usuário:', err);
+    throw new Error('Erro interno ao tentar atualizar o usuário.');
+  }
 }
+
 
 export async function deleteUser(id: string): Promise<{ success: boolean; message: string }> {
   const deleteQuery = `

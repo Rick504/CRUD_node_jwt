@@ -6,7 +6,7 @@ const deleteController = async (req: Request, res: Response) => {
   try {
     const token = req.headers['x-access-token'] as string;
     const jwtSecret = process.env.JWT_SECRET as string;
-     const decoded = jwt.verify(token, jwtSecret) as { userDataJWT: { id: string } };
+    const decoded = jwt.verify(token, jwtSecret) as { userDataJWT: { id: string } };
     const { id } = decoded.userDataJWT;
 
     const { success } = await deleteUser(id);
