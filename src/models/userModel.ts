@@ -93,32 +93,28 @@ export async function updateUser(user: IUser, id: string) {
     });
 }
 
-export async function deleteUser(id: string) {
-  // Consulta para verificar se o id existe
-  const selectQuery = `
-    SELECT *
-    FROM users
-    WHERE id = $1;
+export async function deleteUser(id: string): Promise<{ success: boolean; message: string }> {
+  const deleteQuery = `
+    DELETE FROM users
+    WHERE id = $1
+    RETURNING *;
   `;
-
   try {
-    const selectResult = await db.query(selectQuery, [id]);
+    const deleteResult = await db.query(deleteQuery, [id]);
 
-    if (selectResult.rows.length === 0) {
-      throw new Error('O id informado não existe no banco');
+    if (deleteResult.rowCount === 0) {
+      return {
+        success: false,
+        message: 'O id informado não existe no banco.',
+      };
     }
-
-    // Se o id existe, executar a exclusão
-    const deleteQuery = `
-      DELETE FROM users
-      WHERE id = $1;
-    `;
-    const deleteValues = [id];
-
-    const deleteResult = await db.query(deleteQuery, deleteValues);
-    return deleteResult.rows[0];
+    return {
+      success: true,
+      message: 'Usuário deletado com sucesso.',
+    };
   } catch (err) {
     console.error('Erro ao deletar usuário:', err);
-    throw err;
+    throw new Error('Erro interno ao tentar deletar o usuário.');
   }
 }
+

@@ -9,27 +9,25 @@ const loginController = async (req: Request, res: Response) => {
     const textPassword = password;
     const hashPasswordDb = await getUserByEmail(email);
 
-    const isValidPassword = bcrypt.compareSync(
-      textPassword,
-      hashPasswordDb.password
-    );
+    const isValidPassword = await bcrypt.compare(textPassword, hashPasswordDb.password);
 
     if (isValidPassword) {
-      const user = {
-        email: req.body.email,
-        password: hashPasswordDb.password,
-      };
+       const userValidaty = await authUserLogin({
+          email: email,
+          password: hashPasswordDb.password,
+        });
 
-      const userValidaty = await authUserLogin(user);
+        if (!userValidaty) {
+          return res.status(401).json({ error: 'Credenciais inválidas.' });
+        }
 
-      if (!userValidaty) {
-        return res.status(401).json({ msgError: 'Acesso negado.' });
-      }
+        const token = await setToken({
+          id: userValidaty.id,
+          name: userValidaty.name,
+          email
+        });
 
-      const { email } = user;
-      const token = await setToken(user);
-
-      res.status(200).json({ email, auth: true, token });
+        res.status(200).json({ email, auth: true, token });
     } else {
       res.status(401).json('Usuario e senha incorretos.');
     }

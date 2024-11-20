@@ -6,16 +6,8 @@ const readController = async (req: Request, res: Response) => {
   try {
     const jwtSecret = process.env.JWT_SECRET as string;
     const token = req.headers['x-access-token'] as string;
-
-    if (!token) {
-      return res.status(401).json({ message: 'Token não fornecido.' });
-    }
-
     const decoded = jwt.verify(token, jwtSecret) as { userDataJWT: { email: string } };
     const { email } = decoded.userDataJWT;
-
-    console.log('Email decodificado do token:', email);
-
 
     const user = await getUserByEmail(email);
 
