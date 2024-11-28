@@ -9,6 +9,10 @@ import { verifyToken } from '../middlewares/verifyToken';
 const userRouter = express.Router();
 
 // TESTE
+userRouter.get('/', (req: Request, res: Response) => {
+  res.json({ mensagem: 'Aplicação no Ar!' });
+});
+
 userRouter.get('/users', async (req: Request, res: Response) => {
   const users = await getUsers();
   return res.json(users);
