@@ -11,10 +11,11 @@ Para acessar a rota /protegido precisa ser efetuado o login na rota /login, assi
 
     yarn build
 
-# Criar .env com JWT_SECRET e PORT.
+# Criar .env com variáveis necessáridas.
 
     JWT_SECRET=qualquerchavesua
     PORT=5173
+    TEST_MODE=true
 
 # DB CONTAINER
 
