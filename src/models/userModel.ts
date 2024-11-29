@@ -115,28 +115,45 @@ export async function updateUser(user: IUser, id: string): Promise<{ success: bo
 }
 
 
-export async function deleteUser(id: string): Promise<{ success: boolean; message: string }> {
-  const deleteQuery = `
-    DELETE FROM users
-    WHERE id = $1
+export async function softDeleteUser(id: string): Promise<{ success: boolean; message: string }> {
+  const updateQuery = `
+    UPDATE users
+    SET deleted_at = NOW()
+    WHERE id = $1 AND deleted_at IS NULL
     RETURNING *;
   `;
   try {
-    const deleteResult = await db.query(deleteQuery, [id]);
+    const result = await db.query(updateQuery, [id]);
 
-    if (deleteResult.rowCount === 0) {
+    if (result.rowCount === 0) {
       return {
         success: false,
-        message: 'O id informado não existe no banco.',
+        message: 'O id informado não existe ou o usuário já está marcado para exclusão.',
       };
     }
+
     return {
       success: true,
-      message: 'Usuário deletado com sucesso.',
+      message: 'Usuário marcado para exclusão com sucesso.',
     };
   } catch (err) {
-    console.error('Erro ao deletar usuário:', err);
-    throw new Error('Erro interno ao tentar deletar o usuário.');
+    console.error('Erro ao marcar usuário para exclusão:', err);
+    throw new Error('Erro interno ao tentar marcar o usuário para exclusão.');
+  }
+}
+
+export async function permanentlyDeleteUsers(): Promise<void> {
+  const isTestMode = process.env.TEST_MODE === 'true';
+  const interval = isTestMode ? '2 minutes' : '30 days';
+  const deleteQuery = `
+    DELETE FROM users
+    WHERE deleted_at IS NOT NULL AND deleted_at <= NOW() - INTERVAL '${interval}';
+  `;
+  try {
+    const result = await db.query(deleteQuery);
+    console.log(`[SERVICE] Usuários removidos definitivamente: ${result.rowCount}`);
+  } catch (err) {
+    console.error('[SERVICE] Erro ao remover usuários definitivamente:', err);
   }
 }
 

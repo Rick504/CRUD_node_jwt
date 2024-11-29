@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
-import { deleteUser } from '../../models/userModel';
+import { softDeleteUser } from '../../models/userModel';
 
 const deleteController = async (req: Request, res: Response) => {
   try {
@@ -9,13 +9,13 @@ const deleteController = async (req: Request, res: Response) => {
     const decoded = jwt.verify(token, jwtSecret) as { userDataJWT: { id: string } };
     const { id } = decoded.userDataJWT;
 
-    const { success } = await deleteUser(id);
+    const { success } = await softDeleteUser(id);
 
     if (!success) {
       return res.status(404).json({ message: 'Usuário não encontrado.' });
     }
 
-    return res.status(200).json({ message: 'Usuário deletado com sucesso.' });
+    return res.status(200).json({ message: 'Delete de usuário agendado com sucesso.' });
   } catch (err) {
     return res.status(500).json({ message: 'Erro ao tentar deletar conta.' });
   }
