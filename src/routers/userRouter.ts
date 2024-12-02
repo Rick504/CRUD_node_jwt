@@ -1,22 +1,22 @@
-import express, { Request, Response } from 'express';
+import express from 'express';
 import deleteController from '../controllers/users/deleteController';
 import registerController from '../controllers/users/insertController';
 import updateController from '../controllers/users/updateController';
 import readController from '../controllers/users/readController';
 import { getUsers } from '../models/userModel';
 import { verifyToken } from '../middlewares/verifyToken';
+import { config } from '../../config';
 
 const userRouter = express.Router();
 
-// TESTE
-userRouter.get('/', (req: Request, res: Response) => {
-  res.json({ mensagem: 'Aplicação no Ar!' });
-});
+userRouter.get('/', (_, res) => res.json({ mensagem: 'Aplicação no Ar!' }));
 
-userRouter.get('/users', async (req: Request, res: Response) => {
-  const users = await getUsers();
-  return res.json(users);
-});
+if (config.testMode) {
+  userRouter.get('/users', async (req, res) => {
+    const users = await getUsers();
+    res.json({ mensagem: 'List users', users });
+  });
+}
 
 userRouter.get('/user/', readController);
 userRouter.post('/register', registerController);

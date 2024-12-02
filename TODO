@@ -1,0 +1,4 @@
+[] só executar ações caso nao tenha delete nao for null, criar um middleware pra isso
+[] verificar pq ao atualizar conta nao consigo logar novamente
+[] verificar email existente antes de atualizar email
+[] organizar tipos

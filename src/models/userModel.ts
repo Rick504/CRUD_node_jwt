@@ -2,6 +2,7 @@ import db from '../../config/config_pg';
 import { IUser } from '../interfaces/user';
 import { v4 as uuidv4 } from 'uuid';
 import bcrypt from 'bcrypt';
+import { config } from '../../config';
 
 export function getUserByEmail(email: string) {
   const query = `SELECT * FROM users WHERE email = $1`;
@@ -143,8 +144,7 @@ export async function softDeleteUser(id: string): Promise<{ success: boolean; me
 }
 
 export async function permanentlyDeleteUsers(): Promise<void> {
-  const isTestMode = process.env.TEST_MODE === 'true';
-  const interval = isTestMode ? '2 minutes' : '30 days';
+  const interval =  config.testMode ? '2 minutes' : '30 days';
   const deleteQuery = `
     DELETE FROM users
     WHERE deleted_at IS NOT NULL AND deleted_at <= NOW() - INTERVAL '${interval}';
