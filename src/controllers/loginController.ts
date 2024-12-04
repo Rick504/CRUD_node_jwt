@@ -7,23 +7,21 @@ const loginController = async (req: Request, res: Response) => {
   try {
     let { email, password } = req.body;
     const userDb = await getUserByEmail(email);
-    console.log('userDb', userDb)
     const isValidPassword = bcrypt.compareSync(password, userDb.password);
+
+    if (userDb.deleted_at) return res.status(401).json({ error: 'Conta de usuario deletada.' });
 
     if (isValidPassword) {
        const userValidaty = await authUserLogin({
           email: email,
           password: userDb.password,
         });
-
-        if (!userValidaty) {
-          return res.status(401).json({ error: 'Credenciais inválidas.' });
-        }
+        if (!userValidaty) return res.status(401).json({ error: 'Credenciais inválidas.' });
 
         const token = await setToken({
           id: userValidaty.id,
           name: userValidaty.name,
-          email
+          email,
         });
 
         res.status(200).json({ email, auth: true, token });
