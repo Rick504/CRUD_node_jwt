@@ -28,7 +28,6 @@ app.use(userRouter);
 export async function bootstrap() {
   try {
     initializeJobs();
-    console.log('Aplicação inicializada com sucesso!');
   } catch (error) {
     console.error('Erro ao iniciar a aplicação:', error);
     process.exit(1);
@@ -39,7 +38,14 @@ async function startServer() {
   await bootstrap();
 
   app.listen(config.port, () => {
-    console.log(`O aplicativo está sendo executado na porta ${config.port}!`);
+   console.log(`
+    ========================================
+      🚀 Aplicativo em execução com sucesso!
+    ========================================
+
+      🌐 Acesse em: http://localhost:${config.port}
+
+    `);
   });
 }
 
