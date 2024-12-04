@@ -25,13 +25,17 @@ const updateController = async (req: Request, res: Response) => {
     const updatedUser: IUser = {
       name: name || user.name,
       email: email || user.email,
-      password: password ? await bcrypt.hash(password, 10) : user.password,
+      password: password ? password.trim() : user.password,
     };
+
     await updateUser(updatedUser, id);
+
+    const responseUser: Partial<IUser> = { ...updatedUser };
+    delete responseUser.password;
 
     res.status(200).json({
       message: 'Usuário atualizado com sucesso.',
-      data: updatedUser,
+      data: responseUser,
     });
   } catch (err) {
     console.error('Erro ao tentar atualizar conta:', err);

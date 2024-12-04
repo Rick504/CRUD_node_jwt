@@ -6,15 +6,14 @@ import bcrypt from 'bcrypt';
 const loginController = async (req: Request, res: Response) => {
   try {
     let { email, password } = req.body;
-    const textPassword = password;
-    const hashPasswordDb = await getUserByEmail(email);
-
-    const isValidPassword = await bcrypt.compare(textPassword, hashPasswordDb.password);
+    const userDb = await getUserByEmail(email);
+    console.log('userDb', userDb)
+    const isValidPassword = bcrypt.compareSync(password, userDb.password);
 
     if (isValidPassword) {
        const userValidaty = await authUserLogin({
           email: email,
-          password: hashPasswordDb.password,
+          password: userDb.password,
         });
 
         if (!userValidaty) {

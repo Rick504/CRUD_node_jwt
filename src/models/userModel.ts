@@ -4,6 +4,11 @@ import { v4 as uuidv4 } from 'uuid';
 import bcrypt from 'bcrypt';
 import { config } from '../../config';
 
+function hashPassword(password: string) {
+  const saltRounds = 10
+  return bcrypt.hash(password, saltRounds)
+}
+
 export function getUserByEmail(email: string) {
   const query = `SELECT * FROM users WHERE email = $1`;
   const values = [email];
@@ -55,13 +60,13 @@ export function getUsers(): Promise<Object[]> {
 export async function insertUser(user: IUser) {
   const id = uuidv4();
   const { name, email, password } = user;
-  const hashPassword = await bcrypt.hash(password, 10);
+  const _hashPassword = await hashPassword(password)
   const query = `
     INSERT INTO users (id, name, email, password)
     VALUES ($1, $2, $3, $4)
     RETURNING *
   `;
-  const values = [id, name, email, hashPassword];
+  const values = [id, name, email, _hashPassword];
 
   return db
     .query(query, values)
@@ -74,6 +79,7 @@ export async function insertUser(user: IUser) {
 
 export async function updateUser(user: IUser, id: string): Promise<{ success: boolean; data?: IUser; message: string }> {
   const { name, email, password } = user;
+  const _hashPassword = await hashPassword(password)
   try {
     const userExistsQuery = `
       SELECT id
@@ -88,7 +94,6 @@ export async function updateUser(user: IUser, id: string): Promise<{ success: bo
         message: 'Usuário não encontrado.',
       };
     }
-    const hashPassword = password ? await bcrypt.hash(password, 10) : undefined;
 
     const updateQuery = `
       UPDATE users
@@ -100,7 +105,7 @@ export async function updateUser(user: IUser, id: string): Promise<{ success: bo
       RETURNING id, name, email;
     `;
 
-    const values = [name, email, hashPassword, id];
+    const values = [name, email, _hashPassword, id];
     const updateResult = await db.query(updateQuery, values);
 
     return {
