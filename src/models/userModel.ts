@@ -59,14 +59,15 @@ export function getUsers(): Promise<Object[]> {
 
 export async function insertUser(user: IUser) {
   const id = uuidv4();
+  const auth_status = true
   const { name, email, password } = user;
   const _hashPassword = await hashPassword(password)
   const query = `
-    INSERT INTO users (id, name, email, password)
-    VALUES ($1, $2, $3, $4)
+    INSERT INTO users (id, name, email, password, auth_status)
+    VALUES ($1, $2, $3, $4, $5)
     RETURNING *
   `;
-  const values = [id, name, email, _hashPassword];
+  const values = [id, name, email, _hashPassword, auth_status];
 
   return db
     .query(query, values)
@@ -100,9 +101,10 @@ export async function updateUser(user: IUser, id: string): Promise<{ success: bo
       SET
         name = $1,
         email = $2,
-        password = COALESCE($3, password)
+        password = COALESCE($3, password),
+        auth_status = false
       WHERE id = $4
-      RETURNING id, name, email;
+      RETURNING id, name, email, auth_status;
     `;
 
     const values = [name, email, _hashPassword, id];
@@ -124,7 +126,9 @@ export async function updateUser(user: IUser, id: string): Promise<{ success: bo
 export async function softDeleteUser(id: string): Promise<{ success: boolean; message: string }> {
   const updateQuery = `
     UPDATE users
-    SET deleted_at = NOW()
+    SET
+      deleted_at = NOW(),
+      auth_status = false
     WHERE id = $1 AND deleted_at IS NULL
     RETURNING *;
   `;

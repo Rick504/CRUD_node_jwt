@@ -3,6 +3,7 @@ CREATE TABLE "users" (
     "name" VARCHAR(45) NOT NULL,
     "email" VARCHAR(50) UNIQUE NOT NULL,
     "password" VARCHAR(150) NOT NULL,
+    auth_status BOOLEAN DEFAULT FALSE,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     deleted_at TIMESTAMPTZ DEFAULT NULL

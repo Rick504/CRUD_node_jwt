@@ -7,29 +7,36 @@ const loginController = async (req: Request, res: Response) => {
   try {
     let { email, password } = req.body;
     const userDb = await getUserByEmail(email);
-    const isValidPassword = bcrypt.compareSync(password, userDb.password);
 
-    if (userDb.deleted_at) return res.status(401).json({ error: 'Conta de usuario deletada.' });
-
-    if (isValidPassword) {
-       const userValidaty = await authUserLogin({
-          email: email,
-          password: userDb.password,
-        });
-        if (!userValidaty) return res.status(401).json({ error: 'Credenciais inválidas.' });
-
-        const token = await setToken({
-          id: userValidaty.id,
-          name: userValidaty.name,
-          email,
-        });
-
-        res.status(200).json({ email, auth: true, token });
-    } else {
-      res.status(401).json('Usuario e senha incorretos.');
+    if (!userDb || !bcrypt.compareSync(password, userDb.password)) {
+      return res.status(401).json({ error: 'Usuário ou senha incorretos.' });
     }
+
+    if (!userDb.auth_status) {
+      return res.status(401).json({ error: 'Falha ao efetuar login. Conta não autorizada.' });
+    }
+
+    const userValidaty = await authUserLogin({
+      email: email,
+      password: userDb.password,
+    });
+
+    if (!userValidaty) {
+      return res.status(401).json({ error: 'Credenciais inválidas.' });
+    }
+
+    const token = await setToken({
+      id: userValidaty.id,
+      name: userValidaty.name,
+      email,
+    });
+
+    res.status(200).json({ email, auth: true, token });
+
   } catch (err) {
-    res.status(403).json('Erro ao tentar efetuar o login.');
+    console.error(err);
+    res.status(403).json({ error: 'Erro ao tentar efetuar o login.' });
   }
 };
+
 export default loginController;
