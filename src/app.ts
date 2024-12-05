@@ -1,4 +1,5 @@
 import { config } from '../config';
+import { texts } from './utils/textLogs';
 import express from 'express';
 import dotenv from 'dotenv';
 import cors from 'cors';
@@ -11,10 +12,10 @@ dotenv.config();
 const app = express();
 
 app.use(express.json());
-app.use(cors({ origin: `http://localhost:${config.port}` }));
+app.use(cors({ origin: texts.localhost }));
 
 app.use((req, res, next) => {
-  res.setHeader('Access-Control-Allow-Origin', `http://localhost:${config.port}`);
+  res.setHeader('Access-Control-Allow-Origin', texts.localhost);
   res.setHeader(
     'Access-Control-Allow-Headers',
     'Origin, X-Requested-With, Content-Type, Accept, x-access-token'
@@ -36,16 +37,8 @@ export async function bootstrap() {
 
 async function startServer() {
   await bootstrap();
-
   app.listen(config.port, () => {
-   console.log(`
-    ========================================
-      🚀 Aplicativo em execução com sucesso!
-    ========================================
-
-      🌐 Acesse em: http://localhost:${config.port}
-
-    `);
+   console.log(texts.startServer);
   });
 }
 

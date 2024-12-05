@@ -5,3 +5,12 @@ services:
     image: dbcrudsnapdb
     ports:
       - '5432:5432'
+    command: >
+      sh -c "
+        echo '========================================' &&
+        echo '  🚀 Banco de Dados em execução com sucesso!' &&
+        echo '========================================' &&
+        echo '  🌐 Serviço disponível na porta 5432' &&
+        echo '========================================' &&
+        docker-entrypoint.sh postgres
+      "
