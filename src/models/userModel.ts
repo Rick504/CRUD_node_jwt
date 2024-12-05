@@ -101,10 +101,9 @@ export async function updateUser(user: IUser, id: string): Promise<{ success: bo
       SET
         name = $1,
         email = $2,
-        password = COALESCE($3, password),
-        auth_status = false
+        password = COALESCE($3, password)
       WHERE id = $4
-      RETURNING id, name, email, auth_status;
+      RETURNING id, name, email;
     `;
 
     const values = [name, email, _hashPassword, id];

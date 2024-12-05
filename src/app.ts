@@ -1,9 +1,10 @@
 import { config } from '../config';
 import { texts } from './utils/textLogs';
+import { initializeJobs } from './job';
+
 import express from 'express';
 import dotenv from 'dotenv';
 import cors from 'cors';
-import { initializeJobs } from './job';
 
 import appRouter from './routers/index';
 import userRouter from './routers/userRouter';
