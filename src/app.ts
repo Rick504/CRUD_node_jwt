@@ -38,7 +38,7 @@ export async function bootstrap() {
 async function startServer() {
   await bootstrap();
   app.listen(config.port, () => {
-   console.log(texts.startServer);
+   console.log(texts.start_server);
   });
 }
 
