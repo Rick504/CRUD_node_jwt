@@ -1,4 +1,5 @@
 import { Request, Response } from 'express';
+import { getIpAddress } from '../../utils/getIpAddress'
 import { updateUser, getUserById } from '../../models/userModel';
 import { IUser } from '../../interfaces/user';
 import bcrypt from 'bcrypt';
@@ -9,6 +10,8 @@ const updateController = async (req: Request, res: Response) => {
     const token = req.headers['x-access-token'] as string;
     const jwtSecret = process.env.JWT_SECRET as string;
     const decoded = jwt.verify(token, jwtSecret) as { userDataJWT: { id: string } };
+    // const ipAddress = getIpAddress(req)
+    const ipAddress = '0.0.0.0'
 
     const { id } = decoded.userDataJWT;
     const { name, email, password, currentPassword } = req.body;
@@ -28,7 +31,7 @@ const updateController = async (req: Request, res: Response) => {
       password: password ? password.trim() : user.password,
     };
 
-    await updateUser(updatedUser, id);
+    await updateUser(updatedUser, id, ipAddress);
 
     const responseUser: Partial<IUser> = { ...updatedUser };
     delete responseUser.password;

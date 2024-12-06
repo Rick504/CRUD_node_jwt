@@ -1,5 +1,5 @@
 import db from '../../config/config_pg';
-import { IUser } from '../interfaces/user';
+import { IUser,IUserResultUpdate, IUpdateUserResponse } from '../interfaces/user';
 import { v4 as uuidv4 } from 'uuid';
 import bcrypt from 'bcrypt';
 import { config } from '../../config';
@@ -57,6 +57,16 @@ export function getUsers(): Promise<Object[]> {
     });
 }
 
+export function getUsersHistory(): Promise<Object[]> {
+  return db
+    .query('SELECT * FROM users_history_update')
+    .then((res) => res.rows)
+    .catch((err) => {
+      console.error('Erro ao buscar usuários:', err);
+      throw err;
+    });
+}
+
 export async function insertUser(user: IUser) {
   const id = uuidv4();
   const auth_status = true
@@ -78,9 +88,32 @@ export async function insertUser(user: IUser) {
     });
 }
 
-export async function updateUser(user: IUser, id: string): Promise<{ success: boolean; data?: IUser; message: string }> {
+async function insertUserTableUserHistory(user: IUserResultUpdate, ipAddress: string) {
+  const idTable = uuidv4();
+  const { id, name, email } = user;
+
+  const query = `
+    INSERT INTO users_history_update (id, user_id, name, email, ip_address)
+    VALUES ($1, $2, $3, $4, $5)
+    RETURNING *;
+  `;
+  const values = [idTable, id, name, email, ipAddress];
+
+  return db
+    .query(query, values)
+    .then((res) => res.rows[0])
+    .catch((err) => {
+      console.error('Erro ao inserir usuário:', err);
+      throw err;
+    });
+}
+
+
+
+export async function updateUser(user: IUser, id: string, ipAddress: string): Promise<IUpdateUserResponse> {
   const { name, email, password } = user;
   const _hashPassword = await hashPassword(password)
+
   try {
     const userExistsQuery = `
       SELECT id
@@ -107,11 +140,14 @@ export async function updateUser(user: IUser, id: string): Promise<{ success: bo
     `;
 
     const values = [name, email, _hashPassword, id];
-    const updateResult = await db.query(updateQuery, values);
+    const { rows } = await db.query(updateQuery, values);
+    const updateResult = rows[0]
+
+    await insertUserTableUserHistory(updateResult, ipAddress)
 
     return {
       success: true,
-      data: updateResult.rows[0],
+      data: updateResult,
       message: 'Usuário atualizado com sucesso.',
     };
 
@@ -122,7 +158,7 @@ export async function updateUser(user: IUser, id: string): Promise<{ success: bo
 }
 
 
-export async function softDeleteUser(id: string): Promise<{ success: boolean; message: string }> {
+export async function softDeleteUser(id: string): Promise<IUpdateUserResponse> {
   const updateQuery = `
     UPDATE users
     SET
