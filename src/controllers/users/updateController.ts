@@ -10,8 +10,7 @@ const updateController = async (req: Request, res: Response) => {
     const token = req.headers['x-access-token'] as string;
     const jwtSecret = process.env.JWT_SECRET as string;
     const decoded = jwt.verify(token, jwtSecret) as { userDataJWT: { id: string } };
-    // const ipAddress = getIpAddress(req)
-    const ipAddress = '0.0.0.0'
+    const ipAddress = getIpAddress(req)
 
     const { id } = decoded.userDataJWT;
     const { name, email, password, currentPassword } = req.body;

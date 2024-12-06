@@ -8,5 +8,8 @@ export function getIpAddress(req: Request): string {
     req.ip ||
     req.connection.remoteAddress;
 
-  return ip || '0.0.0.0';
+  // Converte ::1 para 127.0.0.1
+  const normalizedIp = ip === '::1' ? '127.0.0.1' : ip;
+
+  return normalizedIp || '0.0.0.0';
 }
