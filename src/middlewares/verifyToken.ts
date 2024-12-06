@@ -1,24 +1,33 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
+import { JwtPayloadCustom } from '../interfaces/jwt'
+import { getUserById } from '../models/userModel'
 
-export function verifyToken(req: Request, res: Response, next: NextFunction) {
+export async function verifyToken(req: Request, res: Response, next: NextFunction) {
   const jwtSecret = process.env.JWT_SECRET as string;
   const token = req.headers['x-access-token'] as string;
 
   if (!token) {
-    res.status(401).send('Token não fornecido.');
-    return;
+    return res.status(401).send('Token não fornecido.');
   }
 
-  jwt.verify(token, jwtSecret, (err: any, decoded: any) => {
-    if (err) {
-      console.log(err);
-      res.status(401).json('Token inválido.');
-      return;
+  try {
+    const decoded = jwt.verify(token, jwtSecret) as JwtPayloadCustom;
+    const userId = decoded.userDataJWT.id
+    const user = await getUserById(userId);
+
+    if (!user) {
+      return res.status(404).send('Usuário não encontrado.');
     }
 
-    req.body.user = decoded.user;
+    if (!user.auth_status) {
+      return res.status(403).send('Acesso negado.');
+    }
 
+    req.body.user = user;
     next();
-  });
+  } catch (err) {
+    console.log(err);
+    return res.status(401).send('Token inválido.');
+  }
 }
