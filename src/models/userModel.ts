@@ -79,12 +79,12 @@ export async function insertUser(user: IUser) {
     });
 }
 
-async function insertUserTableUserHistory(user: IUserResultUpdate, ipAddress: string) {
+async function insertUserTableUserHistorys(table: string, user: IUserResultUpdate, ipAddress: string) {
   const idTable = uuidv4();
   const { id, name, email } = user;
 
   const query = `
-    INSERT INTO users_history_update (id, user_id, name, email, ip_address)
+    INSERT INTO ${table} (id, user_id, name, email, ip_address)
     VALUES ($1, $2, $3, $4, $5)
     RETURNING *;
   `;
@@ -98,8 +98,6 @@ async function insertUserTableUserHistory(user: IUserResultUpdate, ipAddress: st
       throw err;
     });
 }
-
-
 
 export async function updateUser(user: IUser, id: string, ipAddress: string): Promise<IUpdateUserResponse> {
   const { name, email, password } = user;
@@ -132,13 +130,13 @@ export async function updateUser(user: IUser, id: string, ipAddress: string): Pr
 
     const values = [name, email, _hashPassword, id];
     const { rows } = await db.query(updateQuery, values);
-    const updateResult = rows[0]
+    const result = rows[0]
 
-    await insertUserTableUserHistory(updateResult, ipAddress)
+    await insertUserTableUserHistorys('users_history_update', result, ipAddress)
 
     return {
       success: true,
-      data: updateResult,
+      data: result,
       message: 'Usuário atualizado com sucesso.',
     };
 
@@ -149,7 +147,7 @@ export async function updateUser(user: IUser, id: string, ipAddress: string): Pr
 }
 
 
-export async function softDeleteUser(id: string): Promise<IUpdateUserResponse> {
+export async function softDeleteUser(id: string, ipAddress: string): Promise<IUpdateUserResponse> {
   const updateQuery = `
     UPDATE users
     SET
@@ -159,7 +157,10 @@ export async function softDeleteUser(id: string): Promise<IUpdateUserResponse> {
     RETURNING *;
   `;
   try {
-    const result = await db.query(updateQuery, [id]);
+    const { rows } = await db.query(updateQuery, [id]);
+    const result = rows[0]
+
+    await insertUserTableUserHistorys('users_history_delete', result, ipAddress)
 
     if (result.rowCount === 0) {
       return {

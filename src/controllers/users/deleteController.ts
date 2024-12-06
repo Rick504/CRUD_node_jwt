@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
 import { softDeleteUser } from '../../models/userModel';
+import { getIpAddress } from '../../utils/getIpAddress'
 
 const deleteController = async (req: Request, res: Response) => {
   try {
@@ -8,8 +9,9 @@ const deleteController = async (req: Request, res: Response) => {
     const jwtSecret = process.env.JWT_SECRET as string;
     const decoded = jwt.verify(token, jwtSecret) as { userDataJWT: { id: string } };
     const { id } = decoded.userDataJWT;
+    const ipAddress = getIpAddress(req)
 
-    const { success } = await softDeleteUser(id);
+    const { success } = await softDeleteUser(id, ipAddress);
 
     if (!success) {
       return res.status(404).json({ message: 'Usuário não encontrado.' });

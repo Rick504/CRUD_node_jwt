@@ -6,8 +6,13 @@ export const listUsersController = async (req: Request, res: Response) => {
     res.json({ mensagem: 'List users', users });
 }
 
-export const listUsersHistoryController = async (req: Request, res: Response) => {
-    const users_history = await getTableData('users_history_update');
-    res.json({ mensagem: 'List users history', users_history });
+export const listUsersHistoryUpdateController = async (req: Request, res: Response) => {
+    const users_history_update = await getTableData('users_history_update');
+    res.json({ mensagem: 'List users history update', users_history_update });
+}
+
+export const listUsersHistoryDeleteController = async (req: Request, res: Response) => {
+    const users_history_delete = await getTableData('users_history_delete');
+    res.json({ mensagem: 'List users history delete', users_history_delete });
 }
 
