@@ -47,22 +47,13 @@ export function getUserById(id: string) {
     });
 }
 
-export function getUsers(): Promise<Object[]> {
+export function getTableData(table: string): Promise<Object[]> {
   return db
-    .query('SELECT * FROM users')
+    .query(`SELECT * FROM ${table}`)
     .then((res) => res.rows)
-    .catch((err) => {
-      console.error('Erro ao buscar usuários:', err);
-      throw err;
-    });
-}
 
-export function getUsersHistory(): Promise<Object[]> {
-  return db
-    .query('SELECT * FROM users_history_update')
-    .then((res) => res.rows)
     .catch((err) => {
-      console.error('Erro ao buscar usuários:', err);
+      console.error(`Erro ao buscar usuários na tabela ${table}:`, err);
       throw err;
     });
 }
