@@ -13,3 +13,9 @@ export interface IUpdateUserResponse {
   data?: IUser;
   message: string;
 }
+export interface IUserIdentification {
+  id: string;
+  ipAddress: string;
+}
+
+export interface IUpdateUserRequest extends IUser, IUserIdentification {}

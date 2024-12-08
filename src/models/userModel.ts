@@ -1,5 +1,5 @@
 import db from '../../config/config_pg';
-import { IUser,IUserResultUpdate, IUpdateUserResponse } from '../interfaces/user';
+import { IUser,IUserResultUpdate, IUpdateUserResponse, IUpdateUserRequest } from '../interfaces/user';
 import { v4 as uuidv4 } from 'uuid';
 import bcrypt from 'bcrypt';
 import { config } from '../../config';
@@ -99,9 +99,8 @@ async function insertUserTableUserHistorys(table: string, user: IUserResultUpdat
     });
 }
 
-export async function updateUser(user: IUser, id: string, ipAddress: string): Promise<IUpdateUserResponse> {
-  const { name, email, password } = user;
-  const _hashPassword = await hashPassword(password)
+export async function updateUser(userRequest: IUpdateUserRequest): Promise<IUpdateUserResponse> {
+  const { name, email, password, id, ipAddress } = userRequest;
 
   try {
     const userExistsQuery = `
@@ -118,6 +117,24 @@ export async function updateUser(user: IUser, id: string, ipAddress: string): Pr
       };
     }
 
+    const emailExistsQuery = `
+        SELECT id
+        FROM users
+        WHERE email = $1 AND id != $2;
+      `;
+    const emailExistsResult = await db.query(emailExistsQuery, [email, id]);
+
+    const _emailExistsResult = emailExistsResult.rows[0]
+
+    if (_emailExistsResult) {
+      return {
+        success: false,
+        message: 'O e-mail fornecido já está em uso por outro usuário.',
+      };
+    }
+
+    const hashedPassword = password ? await hashPassword(password) : null;
+
     const updateQuery = `
       UPDATE users
       SET
@@ -128,8 +145,16 @@ export async function updateUser(user: IUser, id: string, ipAddress: string): Pr
       RETURNING id, name, email;
     `;
 
-    const values = [name, email, _hashPassword, id];
+    const values = [name, email, hashedPassword, id];
     const { rows } = await db.query(updateQuery, values);
+
+    if (rows.length === 0) {
+      return {
+        success: false,
+        message: 'Erro ao atualizar o usuário. Nenhum dado retornado.',
+      };
+    }
+
     const result = rows[0]
 
     await insertUserTableUserHistorys('users_history_update', result, ipAddress)
@@ -140,8 +165,14 @@ export async function updateUser(user: IUser, id: string, ipAddress: string): Pr
       message: 'Usuário atualizado com sucesso.',
     };
 
-  } catch (err) {
-    console.error('Erro ao atualizar usuário:', err);
+  }
+  catch (err) {
+    console.error('Erro ao atualizar usuário:', {
+      error: err,
+      userId: id,
+      userData: userRequest,
+    });
+
     throw new Error('Erro interno ao tentar atualizar o usuário.');
   }
 }

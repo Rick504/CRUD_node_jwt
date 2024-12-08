@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import { getIpAddress } from '../../utils/getIpAddress'
 import { updateUser, getUserById } from '../../models/userModel';
-import { IUser } from '../../interfaces/user';
+import { IUser, IUpdateUserRequest } from '../../interfaces/user';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 
@@ -30,7 +30,17 @@ const updateController = async (req: Request, res: Response) => {
       password: password ? password.trim() : user.password,
     };
 
-    await updateUser(updatedUser, id, ipAddress);
+    const updateUserRequest: IUpdateUserRequest = {
+      id: id,
+      ipAddress: ipAddress,
+     ...updatedUser
+    };
+
+    const updateResponse = await updateUser(updateUserRequest);
+
+    if (!updateResponse.success) {
+      return res.status(400).json({ msgError: updateResponse.message });
+    }
 
     const responseUser: Partial<IUser> = { ...updatedUser };
     delete responseUser.password;
